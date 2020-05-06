@@ -16,7 +16,7 @@ class Application(tk.Frame):
         # Nb of systems
         self.frame_nb_simulation = tk.Frame(master=self)
         label_nb_simulations = tk.Label(self.frame_nb_simulation, text="Nombre de simulations")
-        entry_nb_simulations = tk.Entry(self.frame_nb_simulation)
+        entry_nb_simulations = tk.Entry(self.frame_nb_simulation, name="nbSystems")
         label_nb_simulations.pack(side = tk.LEFT)
         entry_nb_simulations.pack(side = tk.LEFT)
         self.frame_nb_simulation.pack()
@@ -24,7 +24,7 @@ class Application(tk.Frame):
         # Duration of the simulation
         self.frame_duration = tk.Frame(master=self)
         label_duration = tk.Label(self.frame_duration, text="Durée de la simulation")
-        entry_duration = tk.Entry(self.frame_duration)
+        entry_duration = tk.Entry(self.frame_duration, name="duration")
         label_duration.pack(side = tk.LEFT)
         entry_duration.pack(side = tk.LEFT)
         self.frame_duration.pack()
@@ -35,52 +35,51 @@ class Application(tk.Frame):
 
         self.radios = tk.Frame(master=self.choose_with_radio)
         self.radio_value = tk.IntVar()
-        radio_lambda = tk.Radiobutton(self.radios, text="Lambda", variable=self.radio_value, value=1, command=self.change_option)
-        radio_mtbf = tk.Radiobutton(self.radios, text="MTBF", variable=self.radio_value, value=2, command=self.change_option)
+        radio_lambda = tk.Radiobutton(self.radios, text="Lambda", cursor="hand2", variable=self.radio_value, value=1, command=self.change_option)
+        radio_mtff = tk.Radiobutton(self.radios, text="mtff", cursor="hand2", variable=self.radio_value, value=2, command=self.change_option)
+        radio_lambda.select()
         radio_lambda.pack(side = tk.LEFT)
-        radio_mtbf.pack(side = tk.LEFT)
+        radio_mtff.pack(side = tk.LEFT)
         self.radios.pack()
 
-        self.frame_lambda_mtbf = tk.Frame(master=self.choose_with_radio)
-        label_lambda_mtbf = tk.Label(self.frame_lambda_mtbf, text="Cadence des pannes") # TODO : a changer par "Moyenne avant 1ere panne"
-        label_lambda_mtbf.pack(side = tk.LEFT)
-        entry_lambda_mtbf = tk.Entry(self.frame_lambda_mtbf)
-        entry_lambda_mtbf.pack(side = tk.LEFT)
-        self.frame_lambda_mtbf.pack()
+        self.frame_lambda_mtff = tk.Frame(master=self.choose_with_radio)
+        label_lambda_mtff = tk.Label(self.frame_lambda_mtff, text="Cadence des pannes", name="lambdaMtffLabel")
+        label_lambda_mtff.pack(side = tk.LEFT)
+        entry_lambda_mtff = tk.Entry(self.frame_lambda_mtff, name="probability")
+        entry_lambda_mtff.pack(side = tk.LEFT)
+        self.frame_lambda_mtff.pack()
         self.choose_with_radio.pack()
 
 
         self.frame_step = tk.Frame(master=self)
-        label_step = tk.Label(self.frame_step, text="Pas de la simulation")
-        entry_step = tk.Spinbox(self.frame_step)
+        label_step = tk.Label(self.frame_step, text="Nombre d'etapes de la simulation")
+        entry_step = tk.Spinbox(self.frame_step, from_=0, to=100, name="nbSteps")
         label_step.pack(side = tk.LEFT)
         entry_step.pack(side = tk.LEFT)
         self.frame_step.pack()
 
+        self.submit = tk.Button(self, text="Envoyer", command=self.submitForm)
+        self.submit.pack()
+
         self.simu = tk.Frame(master=self)
         self.simu.pack()
-        # l1 = tk.Label(self, text="This", borderwidth=2, relief="groove")
-        # l1.pack()
 
-        self.quit = tk.Button(self, text="QUIT", fg="red",
-                              command=self.master.destroy)
+        self.quit = tk.Button(self, text="QUIT", fg="red", command=self.getNbSystems)
+        # self.quit = tk.Button(self, text="QUIT", fg="red", command=self.master.destroy)
         self.quit.pack(side="bottom")
+
+    def submitForm(self):
+        return []
 
     def change_option(self):
         if (self.radio_value.get() == 1) :
-            for child in self.frame_lambda_mtbf.winfo_children():
-                print("\n=== New Child ===")
-                print(child.winfo_class())
-                print(child.winfo_id())
-                print(child.winfo_name())
-                print(child.winfo_parent())
+            self.frame_lambda_mtff.children['lambdaMtffLabel'].configure(text="Cadence des pannes")
         else :
-            self.frame_lambda_mtbf.pack()
+            self.frame_lambda_mtff.children['lambdaMtffLabel'].configure(text="Moyenne avant 1ere panne")
 
-
-    def say_hi(self):
-        print("hi there, everyone!")
-
+    ##############
+    # Draw Steps #
+    ##############
     def generate_steps_cursor(self, nbSteps):
         self.currentStep = tk.IntVar()
         scale = tk.Scale(master=self.simu, variable = self.currentStep, orient=tk.HORIZONTAL, from_=1, to=nbSteps, command=self.go_to_step)
@@ -90,7 +89,7 @@ class Application(tk.Frame):
         self.generate_steps_cursor(len(steps))
         self.stepsFrame = []
         for stepIndex, stepFrame in enumerate(steps):
-            self.stepsFrame.append(tk.LabelFrame(master=self.simu, width = 200, text=("Step #" + str(stepIndex + 1))))
+            self.stepsFrame.append(tk.LabelFrame(master=self.simu, width = 200, text=("Etape #" + str(stepIndex + 1))))
             for lineIndex, lineValues in enumerate(stepFrame):
                 for colIndex, colValue in enumerate(lineValues):
                     aLabel = tk.Label(self.stepsFrame[stepIndex], bg = "#0f0", padx=8, bd=1, relief="solid")
@@ -105,6 +104,41 @@ class Application(tk.Frame):
                 stepFrame.pack()
             else :
                 self.stepsFrame[stepIndex].pack_forget()
+
+    ################
+    # Data Getters #
+    ################
+    def getNbSystems(self) : 
+        try:
+            return int(self.frame_nb_simulation.children['nbSystems'].get())
+        except ValueError:
+            print("NaN : Nombre de systemes à simuler")
+            return -1
+
+    def getDuration(self) : 
+        try:
+            return int(self.frame_duration.children['duration'].get())
+        except ValueError:
+            print("NaN : Durée de la simulation")
+            return -1
+    
+    def getProbability(self):
+        try:
+            return (
+                self.radio_value.get(),
+                int(self.frame_lambda_mtff.children['probability'].get())
+            )
+        except ValueError:
+            print("NaN : Probabilité")
+            return -1
+
+    def getNbSteps(self) : 
+        try:
+            return int(self.frame_step.children['nbSteps'].get())
+        except ValueError:
+            print("NaN : Nombre d'etapes")
+            return -1
+
 
 
 root = tk.Tk()
@@ -153,6 +187,6 @@ listTest.append(stepA)
 listTest.append(stepB)
 listTest.append(stepC)
 
-app.generate_steps(listTest)
+# app.generate_steps(listTest)
 
 app.mainloop()
