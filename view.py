@@ -31,9 +31,6 @@ class Application(tk.Frame):
         
         # MTFF : Mean time to first failure 
         # λ : number of expected occurrences
-        """
-        Radio or select
-        """
         self.choose_with_radio = tk.LabelFrame(master=self, text="Choose with radio")
 
         self.radios = tk.Frame(master=self.choose_with_radio)
@@ -50,28 +47,8 @@ class Application(tk.Frame):
         entry_lambda_mtbf = tk.Entry(self.frame_lambda_mtbf)
         entry_lambda_mtbf.pack(side = tk.LEFT)
         self.frame_lambda_mtbf.pack()
-        
         self.choose_with_radio.pack()
 
-        """
-        V2
-        """
-        self.choose_with_select = tk.LabelFrame(master=self, text="Choose with select")
-        listeOptions = ('Lambda', 'MTBF')
-        self.radio_value_2 = tk.StringVar()
-        self.radio_value_2.set(listeOptions[0])
-        # self.frame_lambda_mtbf_2 = tk.Frame(master=self.choose_with_select)
-        label_lambda_mtbf_2 = tk.Label(self.choose_with_select, text="Cadence des pannes / Moyenne 1er fail")
-        entry_lambda_mtbf_2 = tk.Entry(self.choose_with_select)
-        label_lambda_mtbf_2.pack(side = tk.LEFT)
-        entry_lambda_mtbf_2.pack(side = tk.LEFT)
-        option_lambda_mtbf_2 = tk.OptionMenu(self.choose_with_select, self.radio_value_2, *listeOptions)
-        option_lambda_mtbf_2.pack()
-        # self.frame_lambda_mtbf_2.pack()
-        self.choose_with_select.pack()
-        """
-        END
-        """
 
         self.frame_step = tk.Frame(master=self)
         label_step = tk.Label(self.frame_step, text="Pas de la simulation")
