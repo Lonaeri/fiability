@@ -8,7 +8,7 @@ NB_MIN_STEPS = 10
 def stepRecommendation(duration):
     if (duration < NB_MIN_STEPS):
         return duration
-    
+
     counter = NB_MAX_STEPS
     while (counter >= NB_MIN_STEPS and duration % counter != 0):
         counter -= 1
@@ -17,11 +17,20 @@ def stepRecommendation(duration):
     return counter
 
 def calculSimulations(nbSystems, duration, probability, nbSteps):
+    if (nbSystems <= 0):
+        return (1, [])
+    if (duration <= 0):
+        return (2, [])
+    if (nbSteps <= 0):
+        return (4, [])
+
     probaType, probaValue = probability
     if (probaType == 2):
         cadence = 1 / probaValue
     else:
         cadence = probaValue
+    if (cadence <= 0 or cadence > 1):
+        return (3, [])
 
     nb_remains = []
     nb_remains.append((nbSystems, 1))
@@ -30,7 +39,7 @@ def calculSimulations(nbSystems, duration, probability, nbSteps):
         nb_breakdowns, reliability = simu_expo(remains_before, cadence, (duration / nbSteps) * i)
         remains_before = remains_before - nb_breakdowns
         nb_remains.append((remains_before, reliability))
-    return nb_remains
+    return (0, nb_remains)
 
 
 def simu_expo(nb_systems: int, cadence: float, time: float):

@@ -14,8 +14,12 @@ class View(tk.Frame):
         self.systems_view = []
         self.stepsFrame = []
 
-        self.description = tk.Label(self, text="Attention : Tous les durées doivent être dans la même unité", fg="#f00")
+        self.description = tk.Label(self, text="Attention : Tous les durées doivent être dans la même unité")
         self.description.pack(side="top")
+
+        errors_frame = tk.Frame(self)
+        self.errors = tk.Label(errors_frame, fg="#f00")
+        errors_frame.pack()
 
         # Nb of systems
         self.frame_nb_simulation = tk.Frame(master=self)
@@ -31,13 +35,12 @@ class View(tk.Frame):
         
         # MTFF : Mean time to first failure 
         # λ : number of expected occurrences
-
         radios = tk.Frame(master=self)
         self.radio_value = tk.IntVar()
-        radio_lambda = tk.Radiobutton(radios, text="Lambda", cursor="hand2", variable=self.radio_value, value=1, command=self.change_option, indicatoron=0)
+        radio_lambda = tk.Radiobutton(radios, text="Lambda", cursor="hand2", variable=self.radio_value, value=1, command=self.change_option)
         radio_lambda.select()
         radio_lambda.pack(side = tk.LEFT)
-        tk.Radiobutton(radios, text="mtff", cursor="hand2", variable=self.radio_value, value=2, command=self.change_option, indicatoron=0).pack(side = tk.LEFT)
+        tk.Radiobutton(radios, text="mtff", cursor="hand2", variable=self.radio_value, value=2, command=self.change_option).pack(side = tk.LEFT)
         radios.pack()
 
         self.frame_lambda_mtff = tk.Frame(master=self)
@@ -60,12 +63,18 @@ class View(tk.Frame):
 
     def submitForm(self):
         nb_systems = self.getNbSystems()
-        self.all_steps = calculSimulations(
+        error, self.all_steps = calculSimulations(
             nb_systems,
             self.getDuration(),
             self.getProbability(),
             self.getNbSteps()
         )
+        if (error != 0):
+            self.errors.configure(text="Format des données entrées invalides")
+            self.errors.pack()
+            return
+
+        self.errors.pack_forget()
 
         self.generate_steps_cursor(self.getNbSteps())
         self.generate_first_step(nb_systems)
@@ -148,7 +157,7 @@ class View(tk.Frame):
             )
         except ValueError:
             print("NaN : Probabilité")
-            return -1
+            return (-1, -1)
 
     def getNbSteps(self) : 
         try:
